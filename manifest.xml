@@ -1,36 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OfficeApp
-  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-  xsi:type="MailApp">
-
-  <Id>c9f4e821-3b7d-4a2e-9c15-d8f6a3b2e947</Id>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="MailApp">
+  <Id>b3d7f912-4e6a-4c8b-9d2e-a5f1c3e7b924</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>OutlookDomainGuard</ProviderName>
+  <ProviderName>Cirtech Electronics</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-
-  <DisplayName DefaultValue="OutlookDomainGuard"/>
+  <DisplayName DefaultValue="Domain Guard"/>
   <Description DefaultValue="Warns before sending emails to recipients at multiple domains."/>
-
   <IconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
   <HighResolutionIconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
   <SupportUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard"/>
-
   <AppDomains>
     <AppDomain>https://danbarcir.github.io</AppDomain>
   </AppDomains>
-
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
-
   <Requirements>
     <Sets>
-      <Set Name="Mailbox" MinVersion="1.3"/>
+      <Set Name="Mailbox" MinVersion="1.8"/>
     </Sets>
   </Requirements>
-
   <FormSettings>
     <Form xsi:type="ItemEdit">
       <DesktopSettings>
@@ -39,29 +28,22 @@
       </DesktopSettings>
     </Form>
   </FormSettings>
-
   <Permissions>ReadWriteItem</Permissions>
   <Rule xsi:type="RuleCollection" Mode="Or">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
-
   <DisableEntityHighlighting>false</DisableEntityHighlighting>
-
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
-
       <Requirements>
-        <bt:Sets DefaultMinVersion="1.3">
+        <bt:Sets DefaultMinVersion="1.8">
           <bt:Set Name="Mailbox"/>
         </bt:Sets>
       </Requirements>
-
       <Hosts>
         <Host xsi:type="MailHost">
           <DesktopFormFactor>
-
             <FunctionFile resid="Commands.Url"/>
-
             <ExtensionPoint xsi:type="MessageComposeCommandSurface">
               <OfficeTab id="TabDefault">
                 <Group id="msgComposeGroup">
@@ -84,15 +66,12 @@
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
-
             <ExtensionPoint xsi:type="Events">
               <Event Type="ItemSend" FunctionExecution="synchronous" FunctionName="onItemSend"/>
             </ExtensionPoint>
-
           </DesktopFormFactor>
         </Host>
       </Hosts>
-
       <Resources>
         <bt:Images>
           <bt:Image id="Icon.16x16" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
@@ -108,11 +87,9 @@
           <bt:String id="TaskpaneButton.Label" DefaultValue="Domain Guard"/>
         </bt:ShortStrings>
         <bt:LongStrings>
-          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Check recipient domains before sending"/>
+          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Checks recipient domains before sending"/>
         </bt:LongStrings>
       </Resources>
-
     </VersionOverrides>
   </VersionOverrides>
-
 </OfficeApp>
