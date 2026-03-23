@@ -3,20 +3,18 @@
   xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-  xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
   xsi:type="MailApp">
 
-  <Id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</Id>
+  <Id>c9f4e821-3b7d-4a2e-9c15-d8f6a3b2e947</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>OutlookDomainGuard</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
 
   <DisplayName DefaultValue="OutlookDomainGuard"/>
-  <Description DefaultValue="Warns before sending emails to recipients at multiple domains, helping prevent accidental information disclosure."/>
+  <Description DefaultValue="Warns before sending emails to recipients at multiple domains."/>
 
   <IconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
   <HighResolutionIconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
-
   <SupportUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard"/>
 
   <AppDomains>
