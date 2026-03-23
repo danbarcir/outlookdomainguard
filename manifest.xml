@@ -14,8 +14,8 @@
   <DisplayName DefaultValue="OutlookDomainGuard"/>
   <Description DefaultValue="Warns before sending emails to recipients at multiple domains, helping prevent accidental information disclosure."/>
 
-  <IconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon-80.png"/>
-  <HighResolutionIconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon-80.png"/>
+  <IconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
+  <HighResolutionIconUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
 
   <SupportUrl DefaultValue="https://danbarcir.github.io/outlookdomainguard"/>
 
@@ -97,9 +97,9 @@
 
       <Resources>
         <bt:Images>
-          <bt:Image id="Icon.16x16" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon-80.png"/>
-          <bt:Image id="Icon.32x32" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon-80.png"/>
-          <bt:Image id="Icon.80x80" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon-80.png"/>
+          <bt:Image id="Icon.16x16" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
+          <bt:Image id="Icon.32x32" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
+          <bt:Image id="Icon.80x80" DefaultValue="https://danbarcir.github.io/outlookdomainguard/icon.png"/>
         </bt:Images>
         <bt:Urls>
           <bt:Url id="Commands.Url" DefaultValue="https://danbarcir.github.io/outlookdomainguard/commands.html"/>
