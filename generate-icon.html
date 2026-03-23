@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icon</title></head>
+<body style="font-family:sans-serif;padding:30px;">
+  <h2>OutlookDomainGuard — Icon Generator</h2>
+  <p>Click the button below to download your icon file.</p>
+  <canvas id="c" width="80" height="80" style="border:1px solid #ccc;display:block;margin:10px 0;"></canvas>
+  <button onclick="download()" style="padding:10px 20px;font-size:14px;cursor:pointer;">
+    Download icon-80.png
+  </button>
+  <script>
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
+
+    // Draw a simple shield icon
+    ctx.fillStyle = '#1a1d27';
+    ctx.fillRect(0, 0, 80, 80);
+
+    // Shield shape
+    ctx.beginPath();
+    ctx.moveTo(40, 8);
+    ctx.lineTo(68, 20);
+    ctx.lineTo(68, 44);
+    ctx.quadraticCurveTo(68, 64, 40, 74);
+    ctx.quadraticCurveTo(12, 64, 12, 44);
+    ctx.lineTo(12, 20);
+    ctx.closePath();
+    ctx.fillStyle = '#f59e0b';
+    ctx.fill();
+
+    // Exclamation mark
+    ctx.fillStyle = '#1a1d27';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('!', 40, 42);
+
+    function download() {
+      var link = document.createElement('a');
+      link.download = 'icon-80.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
