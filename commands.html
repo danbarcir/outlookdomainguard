@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>OutlookDomainGuard Commands</title>
+
+  <!-- Office.js must load before our code -->
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+
+  <script type="text/javascript">
+
+    // =============================================================
+    // OutlookDomainGuard — commands.js (embedded in commands.html)
+    //
+    // This file runs silently in the background.
+    // It intercepts the Send button and checks recipient domains.
+    //
+    // VERSION BEHAVIOUR:
+    //   Version A: warns if ANY two different domains appear
+    //   Version B: treats INTERNAL_DOMAINS as safe — only warns
+    //              when external domains are mixed in
+    //
+    // To switch between versions, change USE_VERSION below.
+    // To update internal domains (Version B), edit INTERNAL_DOMAINS.
+    // =============================================================
+
+    // ── CONFIGURATION ────────────────────────────────────────────
+
+    // Set to "A" or "B"
+    var USE_VERSION = "B";
+
+    // Version B only: add all your company's internal domains here.
+    // Emails between these domains will never trigger a warning.
+    var INTERNAL_DOMAINS = [
+      "cirtech-electronics.com"
+      // Add more internal domains here if needed, e.g.:
+      // "cirtech.co.za",
+      // "another-internal-domain.com"
+    ];
+
+    // ── OFFICE INITIALISATION ────────────────────────────────────
+
+    Office.initialize = function (reason) {
+      // Nothing needed here — Office.js handles the rest.
+    };
+
+    // =============================================================
+    // onItemSend — called automatically when the user clicks Send.
+    // event.completed({ allowEvent: true })  → allow the send
+    // event.completed({ allowEvent: false }) → block the send
+    // =============================================================
+    function onItemSend(event) {
+      try {
+        var item = Office.context.mailbox.item;
+
+        // Collect all recipients from To, Cc, and Bcc
+        collectAllRecipients(item, function(allRecipients) {
+          try {
+            var domains = extractDomains(allRecipients);
+
+            if (USE_VERSION === "B") {
+              handleVersionB(domains, event);
+            } else {
+              handleVersionA(domains, event);
+            }
+          } catch (err) {
+            // Something went wrong — fail safe and allow the send
+            console.error("[OutlookDomainGuard] Error in domain check:", err);
+            event.completed({ allowEvent: true });
+          }
+        });
+
+      } catch (err) {
+        console.error("[OutlookDomainGuard] Error in onItemSend:", err);
+        event.completed({ allowEvent: true });
+      }
+    }
+
+    // =============================================================
+    // VERSION A LOGIC
+    // Warn if more than one unique domain is found anywhere.
+    // =============================================================
+    function handleVersionA(domains, event) {
+      var uniqueDomains = getUniqueDomains(domains);
+
+      if (uniqueDomains.length <= 1) {
+        // Only one domain — safe to send
+        event.completed({ allowEvent: true });
+        return;
+      }
+
+      // Multiple domains found — block and show warning dialog
+      var domainList = uniqueDomains.sort().join("\n  • ");
+      var message =
+        "⚠ Multiple recipient domains detected\n\n" +
+        "This email is addressed to recipients at more than one domain:\n\n" +
+        "  • " + domainList + "\n\n" +
+        "Please review the recipients before sending.\n\n" +
+        "To send anyway, dismiss this message and click Send again.";
+
+      showNotification(message, event);
+    }
+
+    // =============================================================
+    // VERSION B LOGIC
+    // Internal domains are treated as one safe group.
+    // Only warn when external domains are mixed in, or when two
+    // different external domains appear together.
+    // =============================================================
+    function handleVersionB(domains, event) {
+      var uniqueDomains = getUniqueDomains(domains);
+
+      var internalSet = INTERNAL_DOMAINS.map(function(d) {
+        return d.toLowerCase().trim();
+      });
+
+      var externalDomains = uniqueDomains.filter(function(d) {
+        return internalSet.indexOf(d.toLowerCase()) === -1;
+      });
+
+      var hasInternal = uniqueDomains.some(function(d) {
+        return internalSet.indexOf(d.toLowerCase()) !== -1;
+      });
+
+      var shouldWarn =
+        (hasInternal && externalDomains.length > 0) ||
+        (externalDomains.length > 1);
+
+      if (!shouldWarn) {
+        event.completed({ allowEvent: true });
+        return;
+      }
+
+      // Build the appropriate warning message
+      var message;
+      var sortedExternal = externalDomains.sort();
+
+      if (hasInternal && externalDomains.length > 0) {
+        message =
+          "⚠ External recipient detected\n\n" +
+          "This email includes recipients outside your organisation.\n\n" +
+          "External domain(s):\n  • " + sortedExternal.join("\n  • ") + "\n\n" +
+          "Internal recipients (cirtech-electronics.com) are also included.\n\n" +
+          "Please review the recipients before sending.\n\n" +
+          "To send anyway, dismiss this message and click Send again.";
+      } else {
+        message =
+          "⚠ Multiple external domains detected\n\n" +
+          "This email is addressed to recipients at more than one external domain:\n\n" +
+          "  • " + sortedExternal.join("\n  • ") + "\n\n" +
+          "Please review the recipients before sending.\n\n" +
+          "To send anyway, dismiss this message and click Send again.";
+      }
+
+      showNotification(message, event);
+    }
+
+    // =============================================================
+    // Shows an error notification in Outlook and blocks the send.
+    // The user can dismiss the notification and click Send again
+    // to proceed — this is how Office.js OnSend blocking works.
+    // There is no "Send Anyway" button in the notification itself;
+    // dismissing and re-sending is the equivalent action.
+    // =============================================================
+    function showNotification(message, event) {
+      Office.context.mailbox.item.notificationMessages.addAsync(
+        "domainWarning",
+        {
+          type: Office.MailboxEnums.ItemNotificationMessageType.ErrorMessage,
+          message: message
+        },
+        function(result) {
+          // Block the send — user must dismiss the notification
+          // and click Send again to proceed
+          event.completed({ allowEvent: false });
+        }
+      );
+    }
+
+    // =============================================================
+    // Collects all recipients from To, Cc, and Bcc asynchronously.
+    // Calls back with a flat array of email address strings.
+    // =============================================================
+    function collectAllRecipients(item, callback) {
+      var allAddresses = [];
+      var pending = 3; // To + Cc + Bcc
+
+      function done(addresses) {
+        allAddresses = allAddresses.concat(addresses);
+        pending--;
+        if (pending === 0) {
+          callback(allAddresses);
+        }
+      }
+
+      function getRecipients(recipientField, cb) {
+        try {
+          recipientField.getAsync(function(result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              var addresses = (result.value || []).map(function(r) {
+                return r.emailAddress || "";
+              }).filter(function(a) { return a.length > 0; });
+              cb(addresses);
+            } else {
+              cb([]);
+            }
+          });
+        } catch (e) {
+          cb([]);
+        }
+      }
+
+      getRecipients(item.to,  function(a) { done(a); });
+      getRecipients(item.cc,  function(a) { done(a); });
+      getRecipients(item.bcc, function(a) { done(a); });
+    }
+
+    // =============================================================
+    // Extracts the domain from each email address.
+    // Skips any address that is malformed or cannot be parsed.
+    // =============================================================
+    function extractDomains(addresses) {
+      var domains = [];
+      addresses.forEach(function(address) {
+        try {
+          if (address && address.indexOf("@") !== -1) {
+            var parts = address.split("@");
+            var domain = parts[parts.length - 1].trim().toLowerCase();
+            if (domain.length > 0) {
+              domains.push(domain);
+            }
+          }
+        } catch (e) {
+          // Skip malformed addresses silently
+        }
+      });
+      return domains;
+    }
+
+    // =============================================================
+    // Returns a deduplicated array of domain strings.
+    // =============================================================
+    function getUniqueDomains(domains) {
+      var seen = {};
+      var unique = [];
+      domains.forEach(function(d) {
+        if (!seen[d]) {
+          seen[d] = true;
+          unique.push(d);
+        }
+      });
+      return unique;
+    }
+
+  </script>
+</head>
+<body>
+  <!-- This page is intentionally invisible — it runs in the background -->
+</body>
+</html>
